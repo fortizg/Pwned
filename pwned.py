@@ -4,6 +4,7 @@ import hashlib
 import requests
 import argparse
 import re
+from urllib3.exceptions import InsecureRequestWarning
 
 def check_leak(x):
 
@@ -15,9 +16,12 @@ def check_leak(x):
         'User-Agent': 'password checker'
     }
 
+    # Suppress the warnings from urllib3
+    requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
+
     url = "https://api.pwnedpasswords.com/range/{}".format(prefix)
 
-    req = requests.get(url, headers=header).content.decode('utf-8')
+    req = requests.get(url, headers=header, verify=False).content.decode('utf-8')
     # split the result twice - each line into key, value pairs of hash-postfixes and the usage count.
     hashes = dict(t.split(":") for t in req.split('\r\n'))
 
